@@ -416,6 +416,12 @@ CONFIG_PCI_LABEL=y
 # Kernel Features
 #
 
+# KernelSU
+
+# CONFIG_KPROBES is not set
+# CONFIG_HAVE_KPROBES is not set
+# CONFIG_KPROBE_EVENTS is not set
+
 #
 # ARM errata workarounds via the alternatives framework
 #
