@@ -420,7 +420,9 @@ CONFIG_PCI_LABEL=y
 
 # CONFIG_KPROBES is not set
 # CONFIG_HAVE_KPROBES is not set
-# CONFIG_KPROBE_EVENTS is not set
+# CONFIG_KSU_NO_KPROBE is not set
+CONFIG_KSU=y
+CONFIG_KPROBE_EVENTS=y
 
 #
 # ARM errata workarounds via the alternatives framework
