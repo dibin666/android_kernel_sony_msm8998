@@ -1,4 +1,3 @@
-
 ccflags-y += -Idrivers/media/platform/msm/camera_v2/jpeg_10
 ccflags-y += -Idrivers/media/platform/msm/camera_v2/sensor/io
 ccflags-y += -Idrivers/media/platform/msm/camera_v2/common
