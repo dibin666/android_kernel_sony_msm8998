@@ -60,4 +60,10 @@ cd $ANYKERNEL3_DIR/
 zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
 echo -e "$yellow**** 复制打包好的 Zip 文件到指定的目录 ****$nocol"
 cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP /mnt/disk/kernelout
-
+echo -e "$yellow**** 清理目录 ****$nocol"
+cd ..
+rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
+rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
+rm -rf $ANYKERNEL3_DIR/dtbo.img
+rm -rf out/
+echo -e "$yellow**** 构建完成 ****$nocol"
