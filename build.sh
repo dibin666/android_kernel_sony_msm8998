@@ -48,16 +48,16 @@ make ${BUILD_ARGS}
 
 echo -e "$yellow**** 验证 Image.gz-dtb ****$nocol"
 ls $PWD/out/arch/arm64/boot/Image.gz-dtb
-echo -e "$yellow**** 验证 AnyKernel3 目录 ****$nocol"
+echo -e "$yellow**** 进入 AnyKernel3 目录 ****$nocol"
 ls $ANYKERNEL3_DIR
-echo -e "$yellow**** 清理 AnyKernel3 工作目录 ****$nocol"
+echo -e "$yellow**** 清理 AnyKernel3 目录 ****$nocol"
 rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
 rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
-echo -e "$yellow**** 复制 Image.gz-dtb 到 AnyKernel3 工作目录 ****$nocol"
+echo -e "$yellow**** 复制 Image.gz-dtb 到 AnyKernel3 目录 ****$nocol"
 cp $PWD/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
 echo -e "$yellow**** 正在打包内核为可刷入 Zip 文件 ****$nocol"
 cd $ANYKERNEL3_DIR/
 zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
-echo -e "$yellow**** 复制打包好的 Zip 文件到指定的输出目录 ****$nocol"
+echo -e "$yellow**** 复制打包好的 Zip 文件到指定的目录 ****$nocol"
 cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP /mnt/disk/kernelout
 
