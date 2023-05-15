@@ -11,7 +11,7 @@ export KERNEL_DEFCONFIG=lineage-msm8998-yoshino-maple_dsds_defconfig
 # 编译临时目录，避免污染根目录
 export OUT=out
 # clang 绝对路径
-export CLANG_PATH=/mnt/disk/tool/proton-clang
+export CLANG_PATH=/mnt/disk/tool/clang
 export PATH=${CLANG_PATH}/bin:${PATH}
 export CLANG_TRIPLE=aarch64-linux-gnu-
 # gcc 绝对路径
@@ -36,7 +36,7 @@ export DEF_ARGS="O=${OUT} \
                                 CC=clang \
                                 CXX=clang++ \
                                 ARCH=${ARCH} \
-                                CROSS_COMPILE=${CLANG_PATH}/bin/aarch64-linux-android- \
+                                CROSS_COMPILE=${CLANG_PATH}/bin/aarch64-linux-gnu- \
                                 CROSS_COMPILE_ARM32=${CLANG_PATH}/bin/arm-linux-gnueabi- \
                                 LD=ld.lld "
 
