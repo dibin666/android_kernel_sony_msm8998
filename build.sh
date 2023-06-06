@@ -7,12 +7,6 @@ if [ "$choice" = "y" ]; then
   curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 fi
 
-# 删除 KernelSU/kernel/ksu.c 关于KPROBES依赖的警告 （部分内核不删除会error）
-read -p "是否删除KernelSU/kernel/ksu.c 关于KPROBES依赖的警告 （部分内核不删除会error）？(y/n): " choice
-if [ "$choice" = "y" ]; then
-  sed -i '59,60d' KernelSU/kernel/ksu.c
-fi
-
 # AnyKernel3 路径
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
 # 编译完成后内核名字
