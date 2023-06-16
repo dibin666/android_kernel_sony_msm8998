@@ -1,76 +1,108 @@
 #!/bin/bash
 
-# 更新 KernelSU (默认稳定版分支)
-read -p "是否更新 KernelSU？（默认为稳定版分支）(y/n): " choice
+# 添加 Anykernel3
+rm -rf AnyKernel3
+git clone --depth=1 https://github.com/dibin666/AnyKernel3 -b maple_dsds
+
+# 添加 KernelSU
+read -p "是否添加 KernelSU？(y/n): " choice
 if [ "$choice" = "y" ]; then
   rm -rf KernelSU
-  curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+  # 提示用户选择版本
+  read -p "请选择版本（开发版/稳定版）：(1/0): " channel
+  
+  if [ "$channel" = "1" ]; then
+    echo "您选择了开发版"
+    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
+  elif [ "$channel" = "0" ]; then
+    echo "您选择了稳定版"
+    curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+  else
+    echo "无效的选择"
+    exit 1
+  fi
 fi
+
+# 当前时间
+current_time=$(date +"%Y-%m-%d-%H")
 
 # AnyKernel3 路径
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
+
 # 编译完成后内核名字
-FINAL_KERNEL_ZIP=whatawurst_KSU_A13_dibin.zip
+FINAL_KERNEL_ZIP=AnyKernel3-whatwursts-maple_dsds-${current_time}.zip
+
 # 内核工作目录
 export KERNEL_DIR=$(pwd)
+
 # 内核 defconfig 文件
 export KERNEL_DEFCONFIG=lineage-msm8998-yoshino-maple_dsds_defconfig
+
 # 编译临时目录，避免污染根目录
 export OUT=out
-# clang 绝对路径
-export CLANG_PATH=/mnt/disk/tool/clang
+
+# clang 和 gcc 绝对路径
+export CLANG_PATH=/mnt/pt2/kernel/tool/clang12
 export PATH=${CLANG_PATH}/bin:${PATH}
-export CLANG_TRIPLE=aarch64-linux-gnu-
-# gcc 绝对路径
-#export GCC_PATH=/mnt/disk/tool/gcc-aosp
-#export PATH=${GCC_PATH}/bin:${PATH}
-# arch平台，这里时arm64
-export ARCH=arm64
-export SUBARCH=arm64
-# 只使用clang编译需要配置
-export LLVM=1
-export BUILD_INITRAMFS=1
+export GCC_PATH=/mnt/pt2/kernel/tool/gcc
 
-# ./build.sh 4
-
-#16为线程数，可以指定#
-TH_COUNT=16
-if [[ "" != "$1" ]]; then
-        TH_NUM=$1
-fi
-
+# 编译参数
 export DEF_ARGS="O=${OUT} \
+				ARCH=arm64 \
                                 CC=clang \
-                                CXX=clang++ \
-                                ARCH=${ARCH} \
-                                CROSS_COMPILE=${CLANG_PATH}/bin/aarch64-linux-gnu- \
-                                CROSS_COMPILE_ARM32=${CLANG_PATH}/bin/arm-linux-gnueabi- \
-                                LD=ld.lld "
+				CLANG_TRIPLE=aarch64-linux-gnu- \
+				CROSS_COMPILE=${GCC_PATH}/aarch64-linux-android-4.9/bin/aarch64-linux-android- \
+                                CROSS_COMPILE_ARM32=${GCC_PATH}/arm-linux-androideabi-4.9/bin/arm-linux-androideabi- \
+				LD=ld.lld "
 
-export BUILD_ARGS="-j${TH_COUNT} ${DEF_ARGS}"
+export BUILD_ARGS="-j$(nproc --all) ${DEF_ARGS}"
 
-echo -e "$yellow**** 开始编译内核 ****$nocol"
+# 开始编译内核
 make ${DEF_ARGS} ${KERNEL_DEFCONFIG}
 make ${BUILD_ARGS}
 
-echo -e "$yellow**** 验证 Image.gz-dtb ****$nocol"
-ls $PWD/out/arch/arm64/boot/Image.gz-dtb
-echo -e "$yellow**** 进入 AnyKernel3 目录 ****$nocol"
-ls $ANYKERNEL3_DIR
-echo -e "$yellow**** 清理 AnyKernel3 目录 ****$nocol"
-rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
-rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
-echo -e "$yellow**** 复制 Image.gz-dtb 到 AnyKernel3 目录 ****$nocol"
-cp $PWD/out/arch/arm64/boot/Image.gz-dtb $ANYKERNEL3_DIR/
-echo -e "$yellow**** 正在打包内核为可刷入 Zip 文件 ****$nocol"
+# 复制编译出的文件到 AnyKernel3 目录
+if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
+  cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3/Image.gz-dtb
+elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
+  cp out/arch/arm64/boot/Image-dtb AnyKernel3/Image-dtb
+elif [[ -f out/arch/arm64/boot/Image.gz ]]; then
+  cp out/arch/arm64/boot/Image.gz AnyKernel3/Image.gz
+elif [[ -f out/arch/arm64/boot/Image ]]; then
+  cp out/arch/arm64/boot/Image AnyKernel3/Image
+fi
+
+if [ -f out/arch/arm64/boot/dtbo.img ]; then
+  cp out/arch/arm64/boot/dtbo.img AnyKernel3/dtbo.img
+fi
+
+# 打包内核为可刷入 Zip 文件
 cd $ANYKERNEL3_DIR/
-zip -r9 $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
-echo -e "$yellow**** 复制打包好的 Zip 文件到指定的目录 ****$nocol"
-cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP /mnt/disk/kernelout
-echo -e "$yellow**** 清理目录 ****$nocol"
+zip -r $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
+
+# 复制打包好的 Zip 文件到指定的目录
+cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP ../../out
+
+# 上传打包好的 Zip 文件到 Telegram 频道
+# 设置Telegram Bot的API令牌和频道ID
+TOKEN="6188260032:AAEAegXX69-U8nZiEsykwr0BrxBdrpaTF0c"
+CHANNEL_ID="-1001918020760"
+
+# 要上传的文件路径
+FILE_PATH="$FINAL_KERNEL_ZIP"
+
+# 要发送的消息内容
+MESSAGE="maple_dsds kernel build successfully!"
+
+# 发送API请求，上传文件到Teleram频道
+curl -F chat_id="$CHANNEL_ID" -F document=@"$FILE_PATH" "https://api.telegram.org/bot$TOKEN/sendDocument"
+
+# 发送API请求，发送消息到Telegram频道
+curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
+    -d "chat_id=$CHANNEL_ID" \
+    -d "text=$MESSAGE"
+
+# 清理目录
 cd ..
-rm -rf $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP
-rm -rf $ANYKERNEL3_DIR/Image.gz-dtb
-rm -rf $ANYKERNEL3_DIR/dtbo.img
-rm -rf out/
-echo -e "$yellow**** 构建完成 ****$nocol"
+rm -rf AnyKernel3
+rm -rf out
