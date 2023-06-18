@@ -24,7 +24,7 @@ if [ "$choice" = "y" ]; then
 fi
 
 # 当前时间
-current_time=$(date +"%Y-%m-%d-%H")
+current_time=$(date +"%Y-%m-%d-%H-%s")
 
 # AnyKernel3 路径
 ANYKERNEL3_DIR=$PWD/AnyKernel3/
@@ -42,23 +42,26 @@ export KERNEL_DEFCONFIG=lineage-msm8998-yoshino-maple_dsds_defconfig
 export OUT=out
 
 # clang 和 gcc 绝对路径
-export CLANG_PATH=/mnt/pt2/kernel/tool/clang12
+export CLANG_PATH=/mnt/disk2/tool/prelude-calng
 export PATH=${CLANG_PATH}/bin:${PATH}
-export GCC_PATH=/mnt/pt2/kernel/tool/gcc
+# export GCC_PATH=/mnt/pt2/kernel/tool/gcc
+export CLANG_TRIPLE=aarch64-linux-gnu-
+export SUBARCH=arm64
 
 # 编译参数
 export DEF_ARGS="O=${OUT} \
 				ARCH=arm64 \
                                 CC=clang \
+				CXX=clang++ \
+				CROSS_COMPILE=${CLANG_PATH}/bin/aarch64-linux-gnu- \
+                                CROSS_COMPILE_ARM32=${CLANG_PATH}/bin/arm-linux-gnueabi- \
 				CLANG_TRIPLE=aarch64-linux-gnu- \
-				CROSS_COMPILE=${GCC_PATH}/aarch64-linux-android-4.9/bin/aarch64-linux-android- \
-                                CROSS_COMPILE_ARM32=${GCC_PATH}/arm-linux-androideabi-4.9/bin/arm-linux-androideabi- \
 				LD=ld.lld "
 
 export BUILD_ARGS="-j$(nproc --all) ${DEF_ARGS}"
 
 # 开始编译内核
-make ${DEF_ARGS} ${KERNEL_DEFCONFIG}
+make ${DEF_ARGS} ${KERNEL_DEFCONFIG} --progress
 make ${BUILD_ARGS}
 
 # 复制编译出的文件到 AnyKernel3 目录
@@ -81,12 +84,12 @@ cd $ANYKERNEL3_DIR/
 zip -r $FINAL_KERNEL_ZIP * -x README $FINAL_KERNEL_ZIP
 
 # 复制打包好的 Zip 文件到指定的目录
-cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP ../../out
+# cp $ANYKERNEL3_DIR/$FINAL_KERNEL_ZIP ../../out
 
 # 上传打包好的 Zip 文件到 Telegram 频道
 # 设置Telegram Bot的API令牌和频道ID
-TOKEN=""
-CHANNEL_ID=""
+TOKEN="6188260032:AAEAegXX69-U8nZiEsykwr0BrxBdrpaTF0c"
+CHANNEL_ID="-1001918020760"
 
 # 要上传的文件路径
 FILE_PATH="$FINAL_KERNEL_ZIP"
