@@ -61,7 +61,7 @@ export DEF_ARGS="O=${OUT} \
 export BUILD_ARGS="-j$(nproc --all) ${DEF_ARGS}"
 
 # 开始编译内核
-make ${DEF_ARGS} ${KERNEL_DEFCONFIG} --progress
+make ${DEF_ARGS} ${KERNEL_DEFCONFIG} --trace
 make ${BUILD_ARGS}
 
 # 复制编译出的文件到 AnyKernel3 目录
