@@ -50,7 +50,6 @@ export GCC_PATH=/mnt/disk2/tool2/gcc
 export DEF_ARGS="O=${OUT} \
 				ARCH=arm64 \
                                 CC=clang \
-				CXX=clang++ \
 				CLANG_TRIPLE=aarch64-linux-gnu- \
 				CROSS_COMPILE=${GCC_PATH}/aarch64-linux-android-4.9/bin/aarch64-linux-android- \
                                 CROSS_COMPILE_ARM32=${GCC_PATH}/arm-linux-androideabi-4.9/bin/arm-linux-androideabi- \
@@ -105,5 +104,6 @@ curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
 
 # 清理目录
 cd ..
+rm -rf KernelSU
 rm -rf AnyKernel3
 rm -rf out
